@@ -33,15 +33,14 @@ class Request:
       base_url=self._base_uri,
       headers=self._headers, response_class=Response,
       timeout=ClientTimeout(total=30.0),
-      connector=TCPConnector(ttl_dns_cache=300, use_dns_cache=True),
+      connector=TCPConnector(ssl_context=self.ssl_context),
       raise_for_status=False,
-      trust_env=True,
     )
 
   async def __send(self, method, url, params=None, data=None, response='json') -> dict | str:
     await self._init_session()
     try:
-      async with self._session.request(method, url, params=params, json=data, ssl=self.ssl_context) as resp:
+      async with self._session.request(method, url, params=params, json=data) as resp:
         if self._debug:
           logger.debug(f'{resp.status} {resp.reason} | {resp.url}\n\n{resp.headers}\n\n{await resp.text()}')
         return await getattr(resp, response)()

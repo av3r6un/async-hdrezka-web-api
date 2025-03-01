@@ -120,7 +120,7 @@ class RezkaStreams:
 
 
 class Rezka:
-  base_url = 'https://hdrezka.ag/'
+  base_url = 'http://hdrezka.ag/'
 
   def __init__(self, debug=False):
     self._debug = debug
