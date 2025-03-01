@@ -30,7 +30,8 @@ class Request:
       base_url=self._base_uri,
       headers=self._headers, response_class=Response,
       timeout=ClientTimeout(total=30.0),
-      raise_for_status=False
+      raise_for_status=False,
+      trust_env=True,
     )
 
   async def __send(self, method, url, params=None, data=None, response='json') -> dict | str:
