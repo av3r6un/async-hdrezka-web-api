@@ -1,0 +1,12 @@
+[Unit]
+Description=Local, OneUser HDRezka API
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=on-success
+WorkingDirectory=/web/hdrweb/www/
+ExecStart=/web/hdrweb/.venv/bin/python /web/hdrweb/www/start.py
+
+[Install]
+WantedBy=multi-user.target
