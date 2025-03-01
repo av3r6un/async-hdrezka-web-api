@@ -1,9 +1,10 @@
-from aiohttp import ClientSession, ClientTimeout, ClientError
+from aiohttp import ClientSession, ClientTimeout, ClientError, TCPConnector
 from dotenv import load_dotenv, find_dotenv
 from fake_useragent import UserAgent
 from asyncio import TimeoutError
 from .logger import setup_logger
 from wrappers import Response
+import ssl
 import os
 
 
@@ -24,12 +25,15 @@ class Request:
     self._base_uri = base_uri
     self._debug = debug
     self._session = None
+    self.ssl_context = ssl.create_default_context()
+    self.ssl_context.options |= ssl.OP_NO_TLSv1_3
 
   async def _init_session(self):
     self._session = ClientSession(
       base_url=self._base_uri,
       headers=self._headers, response_class=Response,
       timeout=ClientTimeout(total=30.0),
+      connector=TCPConnector(ttl_dns_cache=300, use_dns_cache=True),
       raise_for_status=False,
       trust_env=True,
     )
@@ -37,7 +41,7 @@ class Request:
   async def __send(self, method, url, params=None, data=None, response='json') -> dict | str:
     await self._init_session()
     try:
-      async with self._session.request(method, url, params=params, json=data) as resp:
+      async with self._session.request(method, url, params=params, json=data, ssl=self.ssl_context) as resp:
         if self._debug:
           logger.debug(f'{resp.status} {resp.reason} | {resp.url}\n\n{resp.headers}\n\n{await resp.text()}')
         return await getattr(resp, response)()
