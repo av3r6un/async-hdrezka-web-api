@@ -2,11 +2,13 @@ from aiohttp import ClientSession, ClientTimeout, ClientError
 from dotenv import load_dotenv, find_dotenv
 from fake_useragent import UserAgent
 from asyncio import TimeoutError
+from .logger import setup_logger
 from wrappers import Response
 import os
 
 
 load_dotenv(find_dotenv())
+logger = setup_logger('Request')
 
 class Request:
   _headers = {
@@ -36,14 +38,13 @@ class Request:
     try:
       async with self._session.request(method, url, params=params, json=data) as resp:
         if self._debug:
-          print(f'{resp.status} {resp.reason} | {resp.url}', resp.headers, await resp.text(), sep='\n\n')
+          logger.debug(f'{resp.status} {resp.reason} | {resp.url}\n\n{resp.headers}\n\n{await resp.text()}')
         return await getattr(resp, response)()
     except (ClientError, TimeoutError) as err:
-      print(err)
+      logger.error(err)
       return None
-    except ArithmeticError:
-      print(await resp.text())
-      print('Bad response from server. Cant parse json.')
+    except AttributeError:
+      logger.error(f'Bad response from server. Cant parse json. Traceback: {await resp.text()}')
     finally:
       await self._close()
 

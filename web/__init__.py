@@ -1,27 +1,33 @@
 from aiohttp.web import json_response, Request
+from utils.logger import setup_logger
 from utils import Rezka
 from aiohttp import web
 
 
 routes = web.RouteTableDef()
 rezka = Rezka(False)
+logger = setup_logger('WebHandler')
 
 @routes.get('/search')
 async def search_media(req: Request):
   keyword = req.query.get('keyword')
   page = req.query.get('page')
-  if page:
-    long_response = None
-    if rezka.search.response:
-      await rezka.search.next_page(int(page))
-      long_response = dict(status='success', body=rezka.search.response.json)
-    else:
-      info = await rezka.search.by_keyword(keyword)
-      await rezka.search.next_page(int(page))
-      long_response = dict(status='success', body=info.json)
-    return json_response(data=long_response)
-  info = await rezka.search.by_keyword(keyword)
-  return json_response(data=dict(status='success', body=info.json))
+  try:
+    if page:
+      long_response = None
+      if rezka.search.response:
+        await rezka.search.next_page(int(page))
+        long_response = dict(status='success', body=rezka.search.response.json)
+      else:
+        info = await rezka.search.by_keyword(keyword)
+        await rezka.search.next_page(int(page))
+        long_response = dict(status='success', body=info.json)
+      return json_response(data=long_response)
+    info = await rezka.search.by_keyword(keyword)
+    return json_response(data=dict(status='success', body=info.json))
+  except ConnectionError as err:
+    logger.error(str(err))
+    return json_response(data=dict(status='error', message=str(err)), status=500)
 
 
 @routes.get('/streams/{id}')
