@@ -12,7 +12,7 @@ class Request:
   _headers = {
     'User-Agent': UserAgent().random,
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-    'Cookie': os.getenv('Cookie'),
+    'Cookie': os.getenv('Cookie'), # access hdrezka.ag, create .env in root folder and paste your Cookie Header
     'Host': 'hdrezka.ag'
   }
   _base_uri: str = None
