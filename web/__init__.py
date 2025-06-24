@@ -35,7 +35,7 @@ async def get_streams(req: Request):
   id = req.match_info.get('id')
   data = {
     'id': id, 'season': int(req.query.get('season', '1')), 'episode': int(req.query.get('episode', '1')),
-    'translator': req.query.get('translator'),
+    'translator': req.query.get('translator', None),
   }
   data = await rezka.streams.get_episode(**data)
   return json_response(data=dict(status='success', body=data.json))
